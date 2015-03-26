@@ -55,7 +55,7 @@ object FunctaParser extends RegexParsers {
     })
   }
 
-  def valueList: Parser[ValueList] = "\\(".r ~> repsep(value, separator) <~ "\\)".r ^^ (l => ValueList(l))
+  def valueList: Parser[ValueList] = "\\(".r ~> repsep(value, separator) <~ "\\)".r ^^ (list => ValueList(list))
   def values: Parser[List[Value]] = rep1sep(valueList | block | dictionary, separator)
 
   def call: Parser[Call] = identifier ~ values ^^ {
@@ -122,17 +122,17 @@ object FunctaParser extends RegexParsers {
     assignment => Dictionary(assignment)
   }
 
-  def identifier: Parser[Identifier] = """\w[\w\d_]*""".r ^^(s => Identifier(s))
+  def identifier: Parser[Identifier] = """\w[\w\d_]*""".r ^^(string => Identifier(string))
 
   def value: Parser[Value] = call | block | dictionary | function | float | int | bool | string | symbol | identifier
 
   def numeric: Parser[Value] = float | int
 
-  def bool: Parser[ImplicitBoolean] = "true|false".r ^^ (s => ImplicitBoolean(s.toBoolean))
-  def int: Parser[ImplicitInt] = "[+-]?[1-9]\\d*".r ^^ (s => ImplicitInt(s.toInt))
-  def float: Parser[ImplicitFloat] = """[+-]?(\d+\.\d*)|(\.\d+)""".r ^^ (s => ImplicitFloat(s.toFloat))
-  def string: Parser[ImplicitString] = "\"".r ~> """[^\"]*""".r <~ "\"".r ^^ (s => ImplicitString(s))
-  def symbol: Parser[ImplicitSymbol] = ":".r ~> identifier ^^ (s => ImplicitSymbol(s.name))
+  def bool: Parser[ImplicitBoolean] = "true|false".r ^^ (string => ImplicitBoolean(string.toBoolean))
+  def int: Parser[ImplicitInt] = "[+-]?[1-9]\\d*".r ^^ (string => ImplicitInt(string.toInt))
+  def float: Parser[ImplicitFloat] = """[+-]?(\d+\.\d*)|(\.\d+)""".r ^^ (string => ImplicitFloat(string.toFloat))
+  def string: Parser[ImplicitString] = "\"".r ~> """[^\"]*""".r <~ "\"".r ^^ (string => ImplicitString(string))
+  def symbol: Parser[ImplicitSymbol] = ":".r ~> identifier ^^ (string => ImplicitSymbol(string.name))
 
   def parse(code: String): List[Statement] = parseAll(program, removeSpaces(code)) match {
     case Success(tree, _) => tree
