@@ -1,0 +1,40 @@
+a : (arg1, arg2), (arg3) => {
+  r : 2
+}
+
+a(1, 2), {
+  c : 3
+}
+
+gar : branch(true), {
+  var : true
+}, {
+  var : false
+}
+
+Human : class[name : 3, age : 4], [
+  var : 3
+]
+
+b : [
+  g : 3, f : 5
+]
+
+sun : branch(day()), (true), (false)
+
+call()
+
+first : (a, b) => a
+
+class : (defaults), (definitions) => {
+  1
+}
+
+a, b : 3, 4
+
+string : "hap"
+
+func : (arg1, arg2, *args), [args : 3, &args] => boy
+func : [args : 3, &args] => boy
+
+ad.ac(3).ac(4).ac
