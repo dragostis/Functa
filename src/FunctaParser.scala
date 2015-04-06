@@ -2,6 +2,8 @@ import scala.util.parsing.combinator.RegexParsers
 
 trait Statement
 
+object EmptyLine extends Statement
+
 case class Assignment(identifier: Identifier, value: Value) extends Statement
 case class AssignmentList(assignments: List[Assignment]) extends Statement
 
@@ -35,12 +37,15 @@ case class ImplicitSymbol(value: String) extends Value
 object FunctaParser extends RegexParsers {
   override val skipWhitespace = false
 
+  def emptyLine: Parser[Statement] = "".r ^^ (_ => EmptyLine)
+  def comment: Parser[String] = "#".r ~> ".*".r
+
   def separator: Parser[String] = ",".r
   def statementSeparator: Parser[String] = """\n|(\n\s*\n)|;""".r
 
   def program: Parser[List[Statement]] = repsep(statement, statementSeparator)
 
-  def statement: Parser[Statement] =  assignment | assignmentList | access | value
+  def statement: Parser[Statement] =  (assignment | assignmentList | access | value | emptyLine) <~ (comment ?)
 
   def access: Parser[Access] = (call | identifier) ~ "\\.".r ~ rep1sep(call | identifier, "\\.".r) ^^ {
     case head ~ _ ~ tail => Access(head :: tail)
@@ -135,10 +140,10 @@ object FunctaParser extends RegexParsers {
   def symbol: Parser[ImplicitSymbol] = ":".r ~> identifier ^^ (string => ImplicitSymbol(string.name))
 
   def parse(code: String): List[Statement] = parseAll(program, removeSpaces(code)) match {
-    case Success(tree, _) => tree
+    case Success(tree, _) => tree.filterNot(statement => statement == EmptyLine)
     case Failure(message, _) => throw new Exception(message)
   }
 
-  private def removeSpaces(code: String): String = code.replaceAll("\n+", "\n").split("\n").
+  private def removeSpaces(code: String): String = code.split("\n").
     map(_.replaceAll("\\s", "")).mkString("\n")
 }
