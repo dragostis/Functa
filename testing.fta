@@ -38,3 +38,7 @@ func : (arg1, arg2, *args), [args : 3, &args] => boy
 func : [args : 3, &args] => boy
 
 ad.ac(3).ac(4).ac
+# comment
+0.0e1
+
+"asdasd\"\n\\\rasd" # comment
