@@ -42,12 +42,14 @@ object FunctaParser extends RegexParsers {
 
   def separator: Parser[String] = ",".r
   def statementSeparator: Parser[String] = """\n|(\n\s*\n)|;""".r
+  def dictionarySeparator: Parser[String] = """\n|(\n\s*\n)|,""".r
+  def accessor: Parser[String] = "\\.".r
 
   def program: Parser[List[Statement]] = repsep(statement, statementSeparator)
 
   def statement: Parser[Statement] =  (assignment | assignmentList | access | value | emptyLine) <~ (comment ?)
 
-  def access: Parser[Access] = (call | identifier) ~ "\\.".r ~ rep1sep(call | identifier, "\\.".r) ^^ {
+  def access: Parser[Access] = (call | identifier) ~ accessor ~ rep1sep(call | identifier, accessor) ^^ {
     case head ~ _ ~ tail => Access(head :: tail)
   }
 
@@ -123,7 +125,7 @@ object FunctaParser extends RegexParsers {
   def block: Parser[Block] = "\\{\n*".r ~> rep1sep(statement, statementSeparator) <~  "\n*\\}".r ^^ {
     statements => Block(statements)
   }
-  def dictionary: Parser[Dictionary] = "\\[\n*".r ~> rep1sep(assignment, """\n|(\n\s*\n)|,""".r) <~  "\n*\\]".r ^^ {
+  def dictionary: Parser[Dictionary] = "\\[\n*".r ~> rep1sep(assignment, dictionarySeparator) <~ "\n*\\]".r ^^ {
     assignment => Dictionary(assignment)
   }
 
