@@ -129,17 +129,26 @@ object FunctaParser extends RegexParsers {
     assignment => Dictionary(assignment)
   }
 
-  def identifier: Parser[Identifier] = """\w[\w\d_]*""".r ^^(string => Identifier(string))
+  def identifier: Parser[Identifier] = """[a-zA-Z][a-zA-Z\d_]*""".r ^^(string => Identifier(string))
 
   def value: Parser[Value] = call | block | dictionary | function | float | int | bool | string | symbol | identifier
 
   def numeric: Parser[Value] = float | int
 
   def bool: Parser[ImplicitBoolean] = "true|false".r ^^ (string => ImplicitBoolean(string.toBoolean))
-  def int: Parser[ImplicitInt] = "[+-]?[1-9]\\d*".r ^^ (string => ImplicitInt(string.toInt))
-  def float: Parser[ImplicitFloat] = """[+-]?(\d+\.\d*)|(\.\d+)""".r ^^ (string => ImplicitFloat(string.toFloat))
-  def string: Parser[ImplicitString] = "\"".r ~> """[^\"]*""".r <~ "\"".r ^^ (string => ImplicitString(string))
+  def int: Parser[ImplicitInt] = "[+-]?([1-9]\\d*)|0".r ^^ (string => ImplicitInt(string.toInt))
+  def float: Parser[ImplicitFloat] = """[+-]?((\d+\.\d*)|(\.\d+))(e[+-]?([1-9]\d*)|0)?""".r ^^ {
+    string => ImplicitFloat(string.toFloat)
+  }
+  def string: Parser[ImplicitString] = "\"".r ~> """((\\[\\nr"])|[^"])*""".r <~ "\"".r ^^ {
+    string => ImplicitString(replaceEscapes(string))
+  }
   def symbol: Parser[ImplicitSymbol] = ":".r ~> identifier ^^ (string => ImplicitSymbol(string.name))
+
+  private def replaceEscapes(string: String) = {
+    val escapes = List(("""\\\\""", "\\\\"), ("""\\n""", "\n"), ("""\\r""", "\r"), ("""\\"""", "\""))
+    escapes.foldLeft(string) ((string, escape) => string.replaceAll(escape._1, escape._2))
+  }
 
   def parse(code: String): List[Statement] = parseAll(program, removeSpaces(code)) match {
     case Success(tree, _) => tree.filterNot(statement => statement == EmptyLine)
