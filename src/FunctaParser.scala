@@ -47,7 +47,7 @@ object FunctaParser extends RegexParsers {
 
   def program: Parser[List[Statement]] = repsep(statement, statementSeparator)
 
-  def statement: Parser[Statement] =  (assignment | assignmentList | access | value | emptyLine) <~ (comment ?)
+  def statement: Parser[Statement] =  (assignment | assignmentList | value | emptyLine) <~ (comment ?)
 
   def access: Parser[Access] = (call | identifier) ~ accessor ~ rep1sep(call | identifier, accessor) ^^ {
     case head ~ _ ~ tail => Access(head :: tail)
@@ -131,7 +131,7 @@ object FunctaParser extends RegexParsers {
 
   def identifier: Parser[Identifier] = """[a-zA-Z][a-zA-Z\d_]*""".r ^^(string => Identifier(string))
 
-  def value: Parser[Value] = call | block | dictionary | function | float | int | bool | string | symbol | identifier
+  def value: Parser[Value] = access | call | block | dictionary | function | float | int | bool | string | symbol | identifier
 
   def bool: Parser[ImplicitBoolean] = "true|false".r ^^ (string => ImplicitBoolean(string.toBoolean))
   def int: Parser[ImplicitInt] = "[+-]?([1-9]\\d*)|0".r ^^ (string => ImplicitInt(string.toInt))
