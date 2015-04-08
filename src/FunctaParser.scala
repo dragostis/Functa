@@ -133,8 +133,6 @@ object FunctaParser extends RegexParsers {
 
   def value: Parser[Value] = call | block | dictionary | function | float | int | bool | string | symbol | identifier
 
-  def numeric: Parser[Value] = float | int
-
   def bool: Parser[ImplicitBoolean] = "true|false".r ^^ (string => ImplicitBoolean(string.toBoolean))
   def int: Parser[ImplicitInt] = "[+-]?([1-9]\\d*)|0".r ^^ (string => ImplicitInt(string.toInt))
   def float: Parser[ImplicitFloat] = """[+-]?((\d+\.\d*)|(\.\d+))(e[+-]?([1-9]\d*)|0)?""".r ^^ {
