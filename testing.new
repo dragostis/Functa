@@ -1,0 +1,55 @@
+# asdas
+
+10
+0
+    1
+2; 3; -2
+2.3
+
+
+    3.4e+100
+    3.4
+true;false
+"a\n\""
+
+dentifier # commentary
+:symbol
+
+# comment
+
+a : 3
+
+# BIG PROBLEM
+# a : 4
+#
+# a, b, c
+
+{
+  a : 3
+}
+
+[b : 4 , c : 4]
+
+hi : formal => if formal, "hello", "hi"
+
+if true, {
+  "heloo"
+}, {
+  "goodbye"
+}
+
+call( #whatever
+  2, 3,
+  4, #whatevs
+  { # haha
+    2
+  }
+)
+
+(plus 1, 2)
+
+n, m : 2 => 0
+
+call.another_call(2, 3).callus(8.sqrt).say :hi
+
+.0
