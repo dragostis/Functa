@@ -12,6 +12,7 @@ case class Access(value: Value, calls: Seq[Call]) extends Value
 
 case class Function(arguments: Seq[String], defaults: Option[Seq[Assignment]], value: Value) extends Value
 
+case class FList(values: Seq[Value]) extends Value
 case class Block(statements: Seq[Value]) extends Value
 case class Dictionary(assignments: Seq[Assignment]) extends Value
 
@@ -49,7 +50,13 @@ class FunctaParser(val input: ParserInput) extends Parser {
     quiet(breakableSpace))
 
   def block      = rule('{' ~ statements.named("statement") ~ '}' ~> Block)
-  def dictionary = rule('[' ~ assignments.named("assignment") ~ ']' ~> Dictionary)
+  def dictionary = rule('{' ~ assignments.named("assignment") ~ '}' ~> Dictionary)
+  def list       = rule('[' ~ (values.named("value") ?) ~ ']' ~> {
+    values => values match {
+      case Some(values) => FList(values)
+      case None         => FList(Seq())
+    }
+  })
 
   def emptyCall     = rule(capture(identifier) ~> (identifier => Call(identifier)))
   def parenCall     = rule(capture(identifier) ~ '(' ~ quiet(breakableSpace) ~ values.named("arguments") ~
@@ -142,7 +149,7 @@ class FunctaParser(val input: ParserInput) extends Parser {
   val nonExpression  = () => rule(access | nonAccess)
 
   def constant      = rule(floatLiteral | integerLiteral| booleanLiteral | stringLiteral | symbolLiteral)
-  def nonAccess     = rule(call | block | dictionary | constant)
+  def nonAccess     = rule(call | block | dictionary | list | constant)
   def expression    = rule(range)
 
   def value: Rule1[Value] = rule(parens | function | assignment | expression)
