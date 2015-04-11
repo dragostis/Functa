@@ -1,62 +1,74 @@
-a : (arg1, arg2), (arg3) => {
-  r : 2
-}
+# asdas
 
-a(1, 2), {
-  c : 3
-}
+10
+0
+    1
+2; 3; -2
+2.3
 
-gar : branch(true), {
-  var : true
-}, {
-  var : false
-}
 
-Human : class[name : 3, age : 4], [
-  var : 3
-]
+    3.4e+100
+    3.4
+true;false
+"a\n\""
 
-b : [
-  g : 3, f : 5
-]
+dentifier # commentary
+:symbol
 
-sun : branch(day()), (true), (false)
-
-call()
-
-first : (a, b) => a
-
-class : (defaults), (definitions) => {
-  1
-}
-
-a, b : 3, 4
-
-string : "hap"
-
-func : (arg1, arg2, *args), [args : 3, &args] => boy
-func : [args : 3, &args] => boy
-
-ad.ac(3).ac(4).ac
 # comment
-0.0e1
 
-"asdasd\"\n\\\rasd" # comment
+a : 3
 
-# 1 -> 10
+# BIG PROBLEM
+# a : 4
+#
+# a, b, c
 
-true || false
+{
+  a : 3
+}
 
-true && false
+[b : 4 , c : 4]
 
-1 = 1
+hi : formal => if formal, "hello", "hi"
 
-2 < 3
+if true, {
+  "heloo"
+}, {
+  "goodbye"
+}
 
-3 + 6
+call( #whatever
+  2, 3,
+  4, #whatevs
+  { # haha
+    2
+  }
+)
 
-4 * 6
+(plus 1, 2)
 
-!true; -4
+n, m : 2 => 0
 
-2 ** 3
+call.another_call(2, 3).callus(8.sqrt).say :hi
+
+.0
+
+# 3 + 4 + 5
+
+5 || b
+
+3..4
+3...5
+
+a && b || c && d
+
+[] = []; 3 != 5
+
+3 <= 2; 2 < 4
+
+-2 + 3
+
+2 ** 3 ** 3
+
+false || false && true = 1 < 5 | 6 & 4 << 3 + 4 * -2 ** !true
