@@ -161,19 +161,23 @@ class FunctaParser(val input: ParserInput) extends Parser {
   def stringLiteral  = rule(capture(string)  ~> StringLiteral)
   def symbolLiteral  = rule(capture(symbol)  ~> SymbolLiteral)
 
-  def identifier  = rule((letter | '_') ~ ((letter | digit | '_') *))
+  def identifier  = rule(letter ~ ((letter | digit | '_') *) | '_' ~ operator ~ '_')
   def identifiers = rule(((capture(identifier) ~ quiet(space)) +).separatedBy(quiet(elementSeparator)))
 
   def boolean = rule(quiet("true") | quiet("false"))
   def integer = rule(('-' ?) ~ (quiet(digit19) ~ oneOrMore(digit) | digit))
   def float   = rule(('-' ?) ~ ((digit +) ~ '.' ~ (digit +) | '.' ~ (digit +)) ~ (exponent ?))
   def string  = rule('"' ~ (('\\' ~ escapeCharacter | !'"' ~ ANY) *) ~ '"')
-  def symbol  = rule(':' ~ identifier)
+  def symbol  = rule(':' ~ ((letter ~ ((letter | digit | '_') *)) | operator))
 
   def exponent        = rule('e' ~ anyOf("+-") ~ (digit +))
   def escapeCharacter = rule(anyOf("\"\\nrtf"))
   
-  def digit   = rule(Digit)
-  def digit19 = rule(Digit19)
-  def letter  = rule(Alpha)
+  def digit    = rule(Digit)
+  def digit19  = rule(Digit19)
+  def letter   = rule(Alpha)
+  def operator = rule(
+    "..." | ".." | "||" | "&&" | "!=" | "=" | "<<" | ">>" | "<=" | ">=" | "<" | ">" | "|" | "^" | "&" | "+" | "-" |
+    "*" | "/" | "%" | "-" | "**" | "!"
+  )
 }
