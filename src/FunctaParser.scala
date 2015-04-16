@@ -158,7 +158,7 @@ class FunctaParser(val input: ParserInput) extends Parser {
   def nonAccess     = rule(call | dictionary | block | list | constant)
   def expression    = rule(range)
 
-  def value: Rule1[Value] = rule(parens | function | assignment | expression)
+  def value: Rule1[Value] = rule(quiet(parens) | function | assignment | expression)
   def values              = rule(((value ~ quiet(space)) +).separatedBy(quiet(elementSeparator)))
 
   def integerLiteral = rule(capture(integer) ~> IntegerLiteral)
