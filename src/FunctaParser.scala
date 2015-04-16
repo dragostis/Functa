@@ -155,7 +155,7 @@ class FunctaParser(val input: ParserInput) extends Parser {
   val nonExpression  = () => rule(access | nonAccess)
 
   def constant      = rule(floatLiteral | integerLiteral| booleanLiteral | stringLiteral | symbolLiteral)
-  def nonAccess     = rule(call | block | dictionary | list | constant)
+  def nonAccess     = rule(call | dictionary | block | list | constant)
   def expression    = rule(range)
 
   def value: Rule1[Value] = rule(parens | function | assignment | expression)
