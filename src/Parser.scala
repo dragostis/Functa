@@ -173,7 +173,7 @@ class Parser(val input: ParserInput) extends org.parboiled2.Parser {
   def boolean = rule(quiet("true") | quiet("false"))
   def integer = rule(('-' ?) ~ (quiet(digit19) ~ oneOrMore(digit) | digit))
   def float   = rule(('-' ?) ~ ((digit +) ~ '.' ~ (digit +) | '.' ~ (digit +)) ~ (exponent ?))
-  def string  = rule('"' ~ (('\\' ~ escapeCharacter | !'"' ~ ANY) *) ~ '"')
+  def string  = rule('"' ~ (('\\' ~ escapeCharacter | !'"' ~ !'\\' ~ ANY) *) ~ '"')
   def symbol  = rule(':' ~ ((letter ~ ((letter | digit | '_') *)) | operator))
 
   def exponent        = rule('e' ~ anyOf("+-") ~ (digit +))
