@@ -1,28 +1,34 @@
 import org.parboiled2._
 
-trait Value
-case class OpValue(operator: String, value: Value)
-
-case class Assignment(names: Seq[String], values: Seq[Value]) extends Value
-
-case class ValueList(values: List[Value]) extends Value
-case class Call(name: String, values: Seq[Value] = Seq()) extends Value
-
-case class Access(value: Value, calls: Seq[Call]) extends Value
-
-case class Function(arguments: Seq[String], defaults: Option[Seq[Assignment]], value: Value) extends Value
-
-case class FList(values: Seq[Value]) extends Value
-case class Block(statements: Seq[Value]) extends Value
-case class Dictionary(assignments: Seq[Assignment]) extends Value
-
-case class BooleanLiteral(value: String) extends Value
-case class IntegerLiteral(value: String) extends Value
-case class FloatLiteral(value: String) extends Value
-case class StringLiteral(value: String) extends Value
-case class SymbolLiteral(value: String) extends Value
-
 class FunctaParser(val input: ParserInput) extends Parser {
+  implicit def index = super.cursor
+
+  class Value(implicit private val index: Int) {
+    def position = {
+      val position = Position(index - 1, input)
+      (position.line, position.column)
+    }
+  }
+
+  case class Assignment(names: Seq[String], values: Seq[Value]) extends Value
+
+  case class ValueList(values: List[Value]) extends Value
+  case class Call(name: String, values: Seq[Value] = Seq()) extends Value
+
+  case class Access(value: Value, calls: Seq[Call]) extends Value
+
+  case class Function(arguments: Seq[String], defaults: Option[Seq[Assignment]], value: Value) extends Value
+
+  case class FList(values: Seq[Value]) extends Value
+  case class Block(statements: Seq[Value]) extends Value
+  case class Dictionary(assignments: Seq[Assignment]) extends Value
+
+  case class BooleanLiteral(value: String) extends Value
+  case class IntegerLiteral(value: String) extends Value
+  case class FloatLiteral(value: String) extends Value
+  case class StringLiteral(value: String) extends Value
+  case class SymbolLiteral(value: String) extends Value
+
   import CharPredicate.{Alpha, Digit, Digit19}
 
   def comment          = rule('#' ~ ((!newLine ~ ANY.named("comment body")) *))
