@@ -1,6 +1,6 @@
 import org.parboiled2._
 
-class FunctaParser(val input: ParserInput) extends Parser {
+class Parser(val input: ParserInput) extends org.parboiled2.Parser {
   implicit def index = super.cursor
 
   class Value(implicit private val index: Int) {
@@ -152,13 +152,13 @@ class FunctaParser(val input: ParserInput) extends Parser {
   val negative       = () => rule(unary(negativeOperator, exponentiation))
   val exponentiation = () => rule(rightBinary(exponentiationOperator, negation))
   val negation       = () => rule(unary(negationOperator, nonExpression))
-  val nonExpression  = () => rule(access | nonAccess)
+  val nonExpression  = () => rule(parens | access | nonAccess)
 
   def constant      = rule(floatLiteral | integerLiteral| booleanLiteral | stringLiteral | symbolLiteral)
   def nonAccess     = rule(call | dictionary | block | list | constant)
   def expression    = rule(range)
 
-  def value: Rule1[Value] = rule(quiet(parens) | function | assignment | expression)
+  def value: Rule1[Value] = rule(function | assignment | expression)
   def values              = rule(((value ~ quiet(space)) +).separatedBy(quiet(elementSeparator)))
 
   def integerLiteral = rule(capture(integer) ~> IntegerLiteral)
