@@ -16,7 +16,7 @@ class Parser(val input: ParserInput) extends org.parboiled2.Parser {
 
   case class Access(value: Value, calls: Seq[Call]) extends Value
 
-  case class Function(arguments: Seq[String], defaults: Option[Seq[Assignment]], value: Value) extends Value
+  case class Function(arguments: Option[Seq[String]], defaults: Option[Seq[Assignment]], value: Value) extends Value
 
   case class FList(values: Seq[Value]) extends Value
   case class Block(statements: Seq[Value]) extends Value
@@ -73,7 +73,7 @@ class Parser(val input: ParserInput) extends org.parboiled2.Parser {
   def access = rule(nonAccess ~ '.' ~ (call +).separatedBy('.') ~> Access)
 
   def arguments = rule(((capture(identifier) ~ quiet(space) ~ !':') +).separatedBy(quiet(elementSeparator)))
-  def inputs    = rule(arguments ~ quiet(space) ~
+  def inputs    = rule((arguments ~ quiet(space) ?) ~
     ((',' ~ quiet(breakableSpace) ~ assignments ~ quiet(space)) ?))
   def function  = rule(inputs ~ "=>" ~ quiet(breakableSpace) ~ expression ~> Function)
 
