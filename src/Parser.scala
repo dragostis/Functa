@@ -73,8 +73,10 @@ class Parser(val input: ParserInput) extends org.parboiled2.Parser {
   def access = rule(nonAccess ~ '.' ~ (call +).separatedBy('.') ~> Access)
 
   def arguments = rule(((capture(identifier) ~ quiet(space) ~ !':') +).separatedBy(quiet(elementSeparator)))
-  def inputs    = rule((arguments ~ quiet(space) ?) ~
-    ((',' ~ quiet(breakableSpace) ~ assignments ~ quiet(space)) ?))
+  def inputs    = rule(
+    (arguments ~ quiet(space) ~ ',' ~ quiet(breakableSpace) ?) ~ ((assignments ~ quiet(space)) ?) ~ !identifier |
+    (arguments ~ quiet(space) ?) ~ ((',' ~ quiet(breakableSpace) ~ assignments ~ quiet(space)) ?)
+  )
   def function  = rule(inputs ~ "=>" ~ quiet(breakableSpace) ~ expression ~> Function)
 
   def parens = rule('(' ~ value ~ ')')
