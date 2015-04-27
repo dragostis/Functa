@@ -12,7 +12,6 @@ class Parser(val input: ParserInput) extends org.parboiled2.Parser {
 
   case class Assignment(names: Seq[String], values: Seq[Value]) extends Value
 
-  case class ValueList(values: List[Value]) extends Value
   case class Call(name: String, values: Seq[Value] = Seq()) extends Value
 
   case class Access(value: Value, calls: Seq[Call]) extends Value
