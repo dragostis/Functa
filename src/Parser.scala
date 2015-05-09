@@ -1,9 +1,10 @@
 import org.parboiled2._
 
-class Parser(val input: ParserInput) extends org.parboiled2.Parser {
+class Parser(val input: ParserInput, parsedFileName: Option[String] = None) extends org.parboiled2.Parser {
   implicit def index = super.cursor
 
   class Value(implicit private val index: Int) {
+    val fileName = parsedFileName
     def position = {
       val position = Position(index - 1, input)
       (position.line, position.column)

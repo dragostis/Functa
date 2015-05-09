@@ -4,11 +4,11 @@ import scala.util.{Failure, Success}
 
 object Main {
   def main(args: Array[String]): Unit = {
-    val tries = scala.io.Source.fromFile("testing.fta").mkString;
+    val simple = scala.io.Source.fromFile("simple.fta").mkString;
 
-    new FunctaParser(tries).program.run() match {
+    new Runtime(simple, Some("simple.fta")).evaluate match {
       case Success(i) => println(i)
-      case Failure(e: ParseError) => println(e.format(tries))
+      case Failure(e: ParseError) => println(e.format(simple))
     }
   }
 }
