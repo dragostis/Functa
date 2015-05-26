@@ -1,3 +1,5 @@
+package functa
+
 import org.parboiled2._
 
 class Parser(val input: ParserInput, parsedFileName: Option[String] = None) extends org.parboiled2.Parser {
@@ -5,15 +7,16 @@ class Parser(val input: ParserInput, parsedFileName: Option[String] = None) exte
 
   class Value(implicit private val index: Int) {
     val fileName = parsedFileName
-    def position = {
+    val position = {
       val position = Position(index - 1, input)
       (position.line, position.column)
     }
   }
 
   case class Assignment(names: Seq[String], values: Seq[Value]) extends Value
+  case class Default(name: String, value: Value)
 
-  case class Call(name: String, values: Seq[Value] = Seq()) extends Value
+  case class Call(name: String, values: Option[Seq[Value]], defaults: Seq[Assignment]) extends Value
 
   case class Access(value: Value, calls: Seq[Call]) extends Value
 
@@ -60,23 +63,34 @@ class Parser(val input: ParserInput, parsedFileName: Option[String] = None) exte
   def list       = rule('[' ~ (values.named("value") ?) ~ ']' ~> {
     values => values match {
       case Some(values) => FList(values)
-      case None         => FList(Seq())
+      case None         => FList(Seq.empty)
     }
   })
 
-  def emptyCall     = rule(capture(identifier) ~> (identifier => Call(identifier)))
-  def parenCall     = rule(capture(identifier) ~ '(' ~ quiet(breakableSpace) ~ values.named("arguments") ~
+  def default  = rule(capture(identifier) ~ quiet(space) ~ '~' ~ quiet(breakableSpace) ~ value ~> {
+    (name, value) => Assignment(Seq(name), Seq(value))
+  })
+  def defaults = rule(quiet(breakableSpace) ~ ((default ~ quiet(space)) *).separatedBy(quiet(elementSeparator)) ~
+    quiet(breakableSpace))
+
+  def emptyCall     = rule(capture(identifier) ~> (identifier => Call(identifier, None, Seq.empty)))
+  def parenCall     = rule(capture(identifier) ~ '(' ~ quiet(breakableSpace) ~ callArgs.named("arguments") ~
     quiet(breakableSpace) ~ ')' ~> Call)
-  def parenlessCall = rule(capture(identifier) ~ quiet(whiteSpace) ~ quiet(space) ~ values.named("arguments") ~>
+  def parenlessCall = rule(capture(identifier) ~ quiet(whiteSpace) ~ quiet(space) ~ callArgs.named("arguments") ~>
     Call)
-  def call          = rule((parenCall.named("call") | parenlessCall.named("call") | emptyCall.named("call")))
+  def callValues    = rule(((value ~ quiet(space) ~ !'~') +).separatedBy(quiet(elementSeparator)))
+  def callArgs      = rule(
+    (callValues ~ quiet(space) ~ ',' ~ quiet(breakableSpace) ?) ~ defaults ~ quiet(space) ~ !value |
+    (callValues ~ quiet(space) ?) ~ quiet(space) ~ push(Seq.empty)
+  )
+  def call          = rule(!boolean ~ (parenCall.named("call") | parenlessCall.named("call") | emptyCall.named("call")))
 
   def access = rule(nonAccess ~ '.' ~ (call +).separatedBy('.') ~> Access)
 
-  def arguments = rule(((capture(identifier) ~ quiet(space) ~ !':') +).separatedBy(quiet(elementSeparator)))
+  def arguments = rule(((capture(identifier) ~ quiet(space) ~ !'~') +).separatedBy(quiet(elementSeparator)))
   def inputs    = rule(
-    (arguments ~ quiet(space) ~ ',' ~ quiet(breakableSpace) ?) ~ assignments ~ quiet(space) ~ !identifier |
-    (arguments ~ quiet(space) ?) ~ push(Seq[Assignment]())
+    (arguments ~ quiet(space) ~ ',' ~ quiet(breakableSpace) ?) ~ defaults ~ quiet(space) ~ !identifier |
+    (arguments ~ quiet(space) ?) ~ quiet(space) ~ push(Seq.empty)
   )
   def function  = rule(inputs ~ "=>" ~ quiet(breakableSpace) ~ expression ~> Function)
 
@@ -85,7 +99,7 @@ class Parser(val input: ParserInput, parsedFileName: Option[String] = None) exte
   def unary(operator: () => Rule0, nextExpression: () => Rule1[Value]) = rule {
     ((capture(operator()) ~ quiet(!digit)) ?) ~ quiet(breakableSpace) ~ nextExpression() ~> {
       (operator, value) => operator match {
-        case Some(operator) => Access(value, Seq(Call(operator, Seq())))
+        case Some(operator) => Access(value, Seq(Call(operator, None, Seq.empty)))
         case None           => value
       }
     }
@@ -94,12 +108,12 @@ class Parser(val input: ParserInput, parsedFileName: Option[String] = None) exte
   def leftSide(operator: () => Rule0, nextExpression: () => Rule1[Value]) = rule {
     nextExpression() ~ quiet(space) ~ capture(operator()) ~ quiet(breakableSpace) ~
       &(nextExpression() ~ quiet(space) ~ capture(operator()) ~ quiet(breakableSpace)) ~> {
-      (value, operator) => Call(operator, Seq(value))
+      (value, operator) => Call(operator, Some(Seq(value)), Seq.empty)
     }
   }
   def rightSide(operator: () => Rule0, nextExpression: () => Rule1[Value]) = rule {
     quiet(space) ~ capture(operator()) ~ quiet(breakableSpace) ~ nextExpression() ~> {
-      (operator, value) => Call(operator, Seq(value))
+      (operator, value) => Call(operator, Some(Seq(value)), Seq.empty)
     }
   }
 
@@ -114,7 +128,7 @@ class Parser(val input: ParserInput, parsedFileName: Option[String] = None) exte
   def rightBinary(operator: () => Rule0, nextExpression: () => Rule1[Value]) = rule {
     (leftSide(operator, nextExpression) *) ~ binary(operator, nextExpression) ~> {
       (calls, access) => calls.foldRight(access) {
-        (call, access) => Access(call.values.head, Seq(Call(call.name, Seq(access))))
+        (call, access) => Access(call.values.get.head, Seq(Call(call.name, Some(Seq(access)), Seq.empty)))
       }
     }
   }

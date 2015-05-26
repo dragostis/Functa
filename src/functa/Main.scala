@@ -1,3 +1,5 @@
+package functa
+
 import org.parboiled2.ParseError
 
 import scala.util.{Failure, Success}
