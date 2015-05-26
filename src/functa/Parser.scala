@@ -187,8 +187,8 @@ class Parser(val input: ParserInput, parsedFileName: Option[String] = None) exte
   def identifiers = rule(((capture(identifier) ~ quiet(space)) +).separatedBy(quiet(elementSeparator)))
 
   def boolean = rule(quiet("true") | quiet("false"))
-  def integer = rule(('-' ?) ~ (quiet(digit19) ~ oneOrMore(digit) | digit))
-  def float   = rule(('-' ?) ~ ((digit +) ~ '.' ~ (digit +) | '.' ~ (digit +)) ~ (exponent ?))
+  def integer = rule(('-' ?) ~ (quiet(digit19) ~ digit +) | digit)
+  def float   = rule(('-' ?) ~ ((digit +) ~ '.' ~ (digit +) | '.' ~ (digit +)) ~ exponent ?)
   def string  = rule('"' ~ (('\\' ~ escapeCharacter | !'"' ~ !'\\' ~ ANY) *) ~ '"')
   def symbol  = rule(':' ~ ((letter ~ ((letter | digit | '_') *)) | operator))
 
