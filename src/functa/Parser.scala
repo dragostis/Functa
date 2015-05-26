@@ -192,7 +192,7 @@ class Parser(val input: ParserInput, parsedFileName: Option[String] = None) exte
   def string  = rule('"' ~ (('\\' ~ escapeCharacter | !'"' ~ !'\\' ~ ANY) *) ~ '"')
   def symbol  = rule(':' ~ ((letter ~ ((letter | digit | '_') *)) | operator))
 
-  def exponent        = rule('e' ~ anyOf("+-") ~ (digit +))
+  def exponent        = rule('e' ~ anyOf("+-") ~ digit +)
   def escapeCharacter = rule(anyOf("\"\\nrtf"))
   
   def digit    = rule(Digit)
